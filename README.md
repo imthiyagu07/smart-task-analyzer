@@ -414,8 +414,8 @@ python manage.py test tasks.tests.ScoringAlgorithmTestCase -v 2
 
 ## 👤 Author
 
-**Imthiyagu**
+**Thiyagarajan**
 - GitHub: [@imthiyagu07](https://github.com/imthiyagu07)
 
 
-**Built with ❤️ and ☕ by Imthiyagu**
+**Built with ❤️ and ☕ by Thiyagarajan**
