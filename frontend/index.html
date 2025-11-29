@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Task Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Smart Task Analyzer</h1>
+            <p class="subtitle">Intelligent task prioritization powered by custom algorithms</p>
+        </header>
+
+        <main class="main-grid">
+            <!-- Input Section (Left) -->
+            <section class="input-section">
+                <h2>📝 Add Your Tasks</h2>
+
+                <!-- Task Input Form -->
+                <div class="task-form">
+                    <div class="form-row">
+                        <input type="text" id="taskTitle" placeholder="Task title" required>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="date" id="taskDueDate" required>
+                        <input type="number" id="taskHours" placeholder="Hours" min="0.1" step="0.1" required>
+                        <input type="number" id="taskImportance" placeholder="Importance (1-10)" min="1" max="10"
+                            required>
+                    </div>
+
+                    <button onclick="addTask()" class="btn btn-add">➕ Add Task</button>
+
+                    <!-- JSON Input Option -->
+                    <details class="json-input">
+                        <summary>Or paste JSON directly</summary>
+                        <textarea id="jsonInput"
+                            placeholder='{"tasks": [{"title": "...", "due_date": "2025-12-01", "estimated_hours": 3.0, "importance": 8, "dependencies": []}]}'></textarea>
+                        <button onclick="loadFromJSON()" class="btn btn-secondary">Load from JSON</button>
+                    </details>
+                </div>
+
+                <!-- Task List -->
+                <div id="taskList" class="task-list"></div>
+            </section>
+
+            <!-- Results Section (Right) -->
+            <section class="results-section">
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button onclick="analyzeTasks()" class="btn btn-primary">🔍 Analyze Tasks</button>
+                    <button onclick="getSuggestions()" class="btn btn-success">✨ Get Top 3 Suggestions</button>
+                    <button onclick="clearAll()" class="btn btn-danger">🗑️ Clear All</button>
+                </div>
+
+                <!-- Results Header with Sort -->
+                <div class="results-header">
+                    <h2>📊 Results</h2>
+                    <select id="sortStrategy">
+                        <option value="priority">🎯 Smart Priority (Recommended)</option>
+                        <option value="fastest_wins">⚡ Fastest Wins (Quick Tasks First)</option>
+                        <option value="deadline">📅 Deadline Driven (Due Date First)</option>
+                        <option value="importance">⭐ Importance First</option>
+                    </select>
+                </div>
+
+                <div id="results" class="results-container">
+                    <p class="placeholder">Add tasks and click "Analyze" to see prioritized results</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with Django + Vanilla JavaScript | Algorithm considers urgency, importance, effort & dependencies
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.dateparse import parse_date
 import json
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from .models import Task
 from .scoring import calculate_priority_score, score_tasks, get_top_tasks_for_today
@@ -43,6 +43,19 @@ def analyze_tasks(request):
                         'message': f'Task {idx + 1} has invalid due_date format. Use YYYY-MM-DD'
                     }, status=400)
                 
+                # Validate date range - only check for dates too far in the past
+                # (Future dates are OK - they'll naturally get lower priority scores)
+                today = date.today()
+                max_past_days = 30  # Allow up to 30 days in the past
+                
+                earliest_allowed = today - timedelta(days=max_past_days)
+                
+                if due_date < earliest_allowed:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Task {idx + 1} due_date is too far in the past (more than {max_past_days} days ago). Please use a more recent date.'
+                    }, status=400)
+                
                 # Validate importance range
                 importance = int(task_data['importance'])
                 if importance < 1 or importance > 10:
@@ -80,11 +93,16 @@ def analyze_tasks(request):
         scored_tasks = score_tasks(tasks)
         
         # Apply sorting strategy
-        if sort_by == 'due_date':
+        if sort_by == 'deadline' or sort_by == 'due_date':
+            # Deadline Driven: Sort by due date (earliest first)
             scored_tasks.sort(key=lambda t: t.due_date)
+        elif sort_by == 'fastest_wins':
+            # Fastest Wins: Sort by estimated hours (quickest first)
+            scored_tasks.sort(key=lambda t: t.estimated_hours)
         elif sort_by == 'importance':
+            # Importance First: Sort by importance level (highest first)
             scored_tasks.sort(key=lambda t: t.importance, reverse=True)
-        # else: already sorted by priority from score_tasks()
+        # else: 'priority' - already sorted by priority score from score_tasks()
         
         # Build response
         response_tasks = []
@@ -97,7 +115,8 @@ def analyze_tasks(request):
                 'dependencies': task.dependencies,
                 'priority_score': task.priority_score,
                 'days_until_due': task.days_until_due(),
-                'is_overdue': task.is_overdue()
+                'is_overdue': task.is_overdue(),
+                'recommendation': "💡 Tip: This is a large task. Consider breaking it down into smaller sub-tasks (e.g., 4-8 hours each) to improve flow." if task.estimated_hours > 24 else None
             })
         
         return JsonResponse({
